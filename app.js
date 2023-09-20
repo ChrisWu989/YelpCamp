@@ -7,6 +7,7 @@ const path = require('path')
 const mongoose = require('mongoose')
 const ejsMate = require('ejs-mate')
 const session = require('express-session')
+const MongoStore = require('connect-mongo')
 const flash = require('connect-flash')
 const helmet = require('helmet')
 const methodOverride = require('method-override')
@@ -20,7 +21,9 @@ const userRoutes = require('./routes/users')
 const campgroundRoutes = require('./routes/campgrounds')
 const reviewRoutes = require('./routes/reviews')
 
-mongoose.connect('mongodb://127.0.0.1:27017/yelp-camp')
+const dbUrl = 'mongodb://127.0.0.1:27017/yelp-camp'
+//process.env.DB_URL
+mongoose.connect(dbUrl)
 const db = mongoose.connection
 db.on("error", console.error.bind(console, "conection error:"))
 db.once("open", () => {
@@ -40,7 +43,20 @@ app.use(mongoSanitize({
     replaceWith: '_'
 }))
 
+const store = MongoStore.create({
+    mongoUrl: dbUrl,
+    touchAfter: 24 * 60 * 60,
+    crypto: {
+        secret: 'thisshouldbeabettersecret!'
+    }
+});
+
+store.on("error", function(e){
+    console.log("Session Store Error", e)
+})
+
 const sessionConfig = {
+    store,
     name: 'session',
     secret: 'thisshouldbeabettersecret!',
     resave: false,
@@ -148,3 +164,11 @@ app.use((err, req, res, next) => {
 app.listen(3000, () => {
     console.log("Open on port 3000")
 })
+
+/*const store = MongoStore.create({
+    mongoUrl: dbUrl,
+    touchAfter: 24 * 60 * 60,
+    crypto: {
+        secret: 'thisshouldbeabettersecret!'
+    }
+});*/
