@@ -164,11 +164,3 @@ app.use((err, req, res, next) => {
 app.listen(3000, () => {
     console.log("Open on port 3000")
 })
-
-/*const store = MongoStore.create({
-    mongoUrl: dbUrl,
-    touchAfter: 24 * 60 * 60,
-    crypto: {
-        secret: 'thisshouldbeabettersecret!'
-    }
-});*/
